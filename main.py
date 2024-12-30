@@ -7,6 +7,7 @@ with open("wowApiConfig.json") as f:
 wowCreds = WowApiCredentialModel.WowApiCredentialModel(configSettings["clientId"],configSettings["clientSecret"])
 
 controller = WowGameDataController.WowGameDataController(wowCreds)
-tokenPrice = controller.FetchTokenPrice()
+test = controller.WowTokenTest()
+tokenPrice = controller.GetWowTokenIndex()
 charProfController = WowCharacterProfileController.WowCharacterProfileController(wowCreds)
-chPro = charProfController.FetchCharacterRender()
+chPro = charProfController.GetCharacterRender()
