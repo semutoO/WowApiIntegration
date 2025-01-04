@@ -6,13 +6,11 @@ class AbstractWowController:
 
     def __init__(self, wowCreds: WowApiCredentialModel):
         self.creds = wowCreds
-        
-    def ApiInvoker(self, request, invokerEndpoint):
+
+    def ApiInvoker(self, request):
         try:
             wowApiInvoker = WowApiInvoker.WowApiInvoker(creds=self.creds)            
-            invokerResponse:AbstractWowApiResponse.AbstractWowApiResponse = wowApiInvoker.CallApi(request)
-            #invokerResponse:AbstractWowApiResponse.AbstractWowApiResponse = invokerEndpoint(wowApiInvoker, request)
-            #invokerResponse:AbstractWowApiResponse.AbstractWowApiResponse = getattr(wowApiInvoker,invokerEndpoint)(request)
+            invokerResponse:AbstractWowApiResponse.AbstractWowApiResponse = wowApiInvoker.CallApi(request)            
             return invokerResponse
         except Exception as ex:
-            return "An error occurred calling %s." % invokerEndpoint
+            return "An error occurred calling %s." % request.endpoint    
