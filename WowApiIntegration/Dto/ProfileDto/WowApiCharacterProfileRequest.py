@@ -1,15 +1,8 @@
-from WowApiIntegration.Dto import AbstractWowApiRequest
+from WowApiIntegration.Dto.ProfileDto import AbstractWowApiProfileRequest
 
-
-class WowApiCharacterProfileRequest(AbstractWowApiRequest.AbstractWowApiRequest):
-    realmSlug = None
-    characterName = None
-    endpoint = None
-
-    def __init__(self, region, realmSlug, charName, namespace, locale, endpoint):
-        self.region = region
-        self.realmSlug = realmSlug
-        self.characterName = charName
-        self.namespace = namespace
-        self.locale = locale
-        self.endpoint = endpoint
+class WowApiCharacterProfileRequest(AbstractWowApiProfileRequest.AbstractWowApiProfileRequest):    
+    def __init__(self, realmSlug, charName, namespace = None, locale = None, region = None, endpoint = None):
+        super().__init__(realmSlug, charName, namespace)                
+        self.region = region if region is not None else self.region
+        self.locale = locale if locale is not None else self.locale
+        self.endpoint = endpoint if endpoint is not None else self.endpoint

@@ -1,26 +1,21 @@
 import requests
 from requests.auth import HTTPBasicAuth
-from WowApiIntegration.Dto import AbstractWowApiRequest, AbstractWowApiResponse, WowApiAccessTokenModel, WowApiAchievementRequest, WowApiCredentialModel
-from WowApiIntegration.Dto.ProfileDto import WowApiCharacterProfileRequest
+from WowApiIntegration.Dto import AbstractWowApiRequest, AbstractWowApiResponse, WowApiAccessTokenModel, WowApiCredentialModel
 
 
 class WowApiInvoker:
-    apiUrl = "api.blizzard.com"
-    region = "us"
-    apiCreds = WowApiCredentialModel.WowApiCredentialModel
-    apiAccessToken = WowApiAccessTokenModel.WowApiAccessTokenModel
-
     def __init__(self,region="us", apiUrl="api.blizzard.com",creds=None):
+        self.apiAccessToken:WowApiAccessTokenModel.WowApiAccessTokenModel = None
         self.region = region.lower()
         self.apiUrl = apiUrl
-        self.apiCreds = creds
+        self.apiCreds:WowApiCredentialModel.WowApiCredentialModel = creds
 
     def GetApiUrl(self):
         return "https://" + self.region + "." + self.apiUrl.lstrip(".")
     
     def DoWithInvoker(self, apiWork): 
         try:
-            if(self.apiAccessToken.IsTokenExpired(self.apiAccessToken)):
+            if(self.apiAccessToken is None or self.apiAccessToken.IsTokenExpired(self.apiAccessToken)):
                 accToken = self.GetWowAccessToken()        
             else:
                 accToken = self.apiAccessToken.accessToken
@@ -53,53 +48,40 @@ class WowApiInvoker:
 
     def AddRequestParamsFromRequestObject(self, request):
         params = dict()
-        requestProperties = {}
-        for base in request.__mro__:
-            requestProperties.update(vars(base))
 
-        for derivedAttr, derivedVal in vars(request).items():
-            if(derivedAttr in requestProperties):
-                requestProperties[derivedAttr] = derivedVal
-
-        #for attr, val in request.__dict__.items():
-        for attr, val in requestProperties.items():
+        for attr, val in vars(request).items():
             if(not attr.startswith("__")):
-                if(val is not None and val):
-                    params[attr] = val
+                params[attr] = val
+
+        # for attr in dir(request):
+        #     if(not attr.startswith("__")):
+        #         val = getattr(request,attr)                
+        #         params[attr] = val
+        
+        # Bug to work out going this route where looping the modules might set base values in first (profile set first, then dynamic)
+        # requestProperties = {}
+        # for base in request.__mro__:
+        #     if(request.__module__ == base.__module__):
+        #         requestProperties.update(vars(base))
+
+        # for derivedAttr, derivedVal in vars(request).items():
+        #     if(derivedAttr in requestProperties):
+        #         requestProperties[derivedAttr] = derivedVal
+
+        # #for attr, val in request.__dict__.items():
+        # for attr, val in requestProperties.items():
+        #     if(not attr.startswith("__")):
+        #         if(val is not None and val):
+        #             params[attr] = val
         return params
     
     def CallApi(self, request):
         params = self.AddRequestParamsFromRequestObject(request)
         return self.DoWithInvoker(lambda client : (self.DoWork(client, request.endpoint, params)))
 
-#region Achievement Endpoints  
-    def GetAchievementIndex(self, request:AbstractWowApiRequest.AbstractWowApiRequest):
-        params = self.GetAbstractRequestParams(request)        
-        return self.DoWithInvoker(lambda client : (self.DoWork(client, request.endpoint, params)))
-
-    def GetAchievement(self, request:WowApiAchievementRequest.WowApiAchievementRequest):
-        params = self.GetAbstractRequestParams(request)
-        #params["achievementId"] = request.achievementId
-        return self.DoWithInvoker(lambda client : (self.DoWork(client, request.endpoint, params)))
-
-    def GetAchievementMedia(self, request:WowApiAchievementRequest.WowApiAchievementRequest):
-        params = self.GetAbstractRequestParams(request)
-        params["achivementId"] = request.achievementId
-        return self.DoWithInvoker(lambda client : (self.DoWork(client, request.endpoint, params)))
-    
-    def GetAchievementCategoryIndex(self, request:AbstractWowApiRequest.AbstractWowApiRequest):
-        params = self.GetAbstractRequestParams(request)
-        return self.DoWithInvoker(lambda client : (self.DoWork(client, request.endpoint, params)))
-    
-    def GetAchievementCategory(self, request:WowApiAchievementRequest.WowApiAchievementRequest):
-        params = self.GetAbstractRequestParams(request)
-        params["achivementCategoryId"] = request.achievementCategoryId
-        return self.DoWithInvoker(lambda client : (self.DoWork(client, request.endpoint, params)))
-#endregion
-
     def GetWowAccessToken(self):
         url = "https://%s.battle.net/oauth/token" % self.region
-        body = {"grant_type": 'client_credentials'}
+        body = {"grant_type": 'client_credentials', "scope": "wow.profile" }
         auth = HTTPBasicAuth(self.apiCreds.clientId, self.apiCreds.clientSecret)
         response = requests.post(url, data=body, auth=auth)
 
@@ -107,40 +89,5 @@ class WowApiInvoker:
             raise Exception("An error occurred retrieving the access token")            
         else:
             response = response.json()
-            self.apiAccessToken = WowApiAccessTokenModel.WowApiAccessTokenModel(response["access_token"], response["token_type"], response["expires_in"], response["sub"])        
+            self.apiAccessToken = WowApiAccessTokenModel.WowApiAccessTokenModel(response["access_token"], response["expires_in"], response["sub"], response["token_type"])        
             return self.apiAccessToken.accessToken
-
-    def GetWowTokenPrice(self, tokenRequest:AbstractWowApiRequest.AbstractWowApiRequest):
-        return self.DoWithInvoker(lambda client, apiUrl : (self.TokenWork(client, apiUrl, tokenRequest)))                                
-                           
-    def TokenWork(self, reqClient, apiUrl, tokenRequest:AbstractWowApiRequest.AbstractWowApiRequest):            
-        params = dict()
-        params["region"] = tokenRequest.region
-        params["namespace"] = tokenRequest.namespace
-        params["locale"] = tokenRequest.locale        
-        tokenResponse = reqClient.get(apiUrl + "/data/wow/token/index", params=params)        
-        workResponse = AbstractWowApiResponse.AbstractWowApiResponse
-        
-        if(tokenResponse.status_code != 200):
-            workResponse.success = False
-            workResponse.errorMessage = tokenResponse
-            return workResponse
-        
-        workResponse.response = tokenResponse.json()["price"]
-        return workResponse
-
-    def GetCharacterMediaSummary(self, charMediaRequest:WowApiCharacterProfileRequest.WowApiCharacterProfileRequest):
-        return self.DoWithInvoker(lambda client, apiUrl : (self.CharacterProfileWork(client, apiUrl, charMediaRequest)))
-    
-    def CharacterProfileWork(self, reqClient, apiUrl, charProfileRequest:WowApiCharacterProfileRequest.WowApiCharacterProfileRequest):    
-        params = dict()
-        params["region"] = charProfileRequest.region
-        params["namespace"] = charProfileRequest.namespace
-        params["locale"] = charProfileRequest.locale        
-        
-        charMediaResponse = reqClient.get(apiUrl + f"/profile/wow/character/{charProfileRequest.realmSlug}/{charProfileRequest.characterName}/{charProfileRequest.endpoint}", params=params)        
-
-        if(charMediaResponse.status_code != 200):
-            return None
-        
-        return charMediaResponse.json()
