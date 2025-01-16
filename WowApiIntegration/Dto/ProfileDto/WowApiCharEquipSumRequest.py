@@ -1,7 +1,5 @@
 from WowApiIntegration.Dto.ProfileDto import AbstractWowApiProfileRequest
 
 class WowApiCharEquipSumRequest(AbstractWowApiProfileRequest.AbstractWowApiProfileRequest):
-    def __init__(self, region, realmSlug, charName, namespace, locale, endpoint):
-        super().__init__(region, namespace, locale, endpoint)
-        self.realmSlug = realmSlug
-        self.characterName = charName
+    def __init__(self, realmSlug, charName, namespace = "profile-us", locale = "en_US", region = "us", endpoint = None):
+        super().__init__(charName, realmSlug, region, namespace, locale, endpoint)        
