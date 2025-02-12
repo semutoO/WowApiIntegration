@@ -57,26 +57,7 @@ class WowApiInvoker:
             for searchField, searchValue in request.searchDictionary.items():
                 if(searchValue is not None):
                     params[searchField] = searchValue            
-        # for attr in dir(request):
-        #     if(not attr.startswith("__")):
-        #         val = getattr(request,attr)                
-        #         params[attr] = val
         
-        # Bug to work out going this route where looping the modules might set base values in first (profile set first, then dynamic)
-        # requestProperties = {}
-        # for base in request.__mro__:
-        #     if(request.__module__ == base.__module__):
-        #         requestProperties.update(vars(base))
-
-        # for derivedAttr, derivedVal in vars(request).items():
-        #     if(derivedAttr in requestProperties):
-        #         requestProperties[derivedAttr] = derivedVal
-
-        # #for attr, val in request.__dict__.items():
-        # for attr, val in requestProperties.items():
-        #     if(not attr.startswith("__")):
-        #         if(val is not None and val):
-        #             params[attr] = val
         return params
     
     def CallApi(self, request):
