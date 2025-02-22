@@ -51,8 +51,8 @@ class WowGameDataController(AbstractWowController.AbstractWowController):
         response = self.ApiInvoker(request)
         return response
     
-    def ConnectedRealmSearch(self, request:WowApiConnectedRealmRequest.WowApiConnectedRealmRequest):        
-        request.endpoint = "/data/wow/connected-realm" if request.endpoint is None else request.endpoint
+    def ConnectedRealmSearch(self, request:WowApiConnectedRealmRequest.WowApiConnectedRealmSearchRequest):        
+        request.endpoint = "/data/wow/search/connected-realm" if request.endpoint is None else request.endpoint
         response = self.ApiInvoker(request)
         return response
 #endregion

@@ -1,6 +1,6 @@
 import requests
 from requests.auth import HTTPBasicAuth
-from WowApiIntegration.Dto import AbstractWowApiRequest, AbstractWowApiResponse, WowApiAccessTokenModel, WowApiCredentialModel
+from WowApiIntegration.Dto import AbstractWowApiRequest, AbstractWowApiResponse, AbstractWowApiSearchRequest, WowApiAccessTokenModel, WowApiCredentialModel
 
 
 class WowApiInvoker:
@@ -27,8 +27,8 @@ class WowApiInvoker:
         except Exception as ex:
             raise ex
 
-    def DoWork(self, reqClient, endpoint, urlParams):
-        response = reqClient.get(self.GetApiUrl() + endpoint, params=urlParams)        
+    def DoWork(self, reqClient, endpoint, urlParams):        
+        response = reqClient.get("%s%s" % (self.GetApiUrl(), endpoint), params=urlParams)   
         workResponse = AbstractWowApiResponse.AbstractWowApiResponse
         
         if(response.status_code != 200):
@@ -50,9 +50,13 @@ class WowApiInvoker:
         params = dict()
 
         for attr, val in vars(request).items():
-            if(not attr.startswith("__")):
+            if(not attr.startswith("__") and not attr == "endpoint" and attr != "searchDictionary"):
                 params[attr] = val
 
+        if(isinstance(request, AbstractWowApiSearchRequest.AbstractWowApiSearchRequest)):
+            for searchField, searchValue in request.searchDictionary.items():
+                if(searchValue is not None):
+                    params[searchField] = searchValue            
         # for attr in dir(request):
         #     if(not attr.startswith("__")):
         #         val = getattr(request,attr)                
