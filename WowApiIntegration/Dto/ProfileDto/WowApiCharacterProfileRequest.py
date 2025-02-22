@@ -1,9 +1,9 @@
-class WowApiCharacterProfileRequest:
-    region = "us"
+from WowApiIntegration.Dto import AbstractWowApiRequest
+
+
+class WowApiCharacterProfileRequest(AbstractWowApiRequest.AbstractWowApiRequest):
     realmSlug = None
     characterName = None
-    namespace = "profile-us"
-    locale = "en_US"
     endpoint = None
 
     def __init__(self, region, realmSlug, charName, namespace, locale, endpoint):
