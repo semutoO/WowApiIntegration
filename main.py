@@ -2,7 +2,7 @@ import json
 from WowApiIntegration.Controllers import WowCharacterProfileController, WowGameDataController
 from WowApiIntegration.Dto import WowApiCredentialModel
 from WowApiIntegration.Dto.GameDataDto import WowApiAuctionRequests, WowApiConnectedRealmRequest, WowApiItemRequest, WowApiPlayableClassRequest, WowApiPlayableRaceRequest, WowApiWowTokenRequest
-from WowApiIntegration.Dto.ProfileDto import AbstractWowApiProfileRequest, WowApiCharEquipSumRequest, WowApiCharacterProfileRequest
+from WowApiIntegration.Dto.ProfileDto import AbstractWowApiProfileRequest, WowApiCharacterProfileRequest
 
 with open("wowApiConfig.json") as f:
     configSettings = json.load(f)    
@@ -29,10 +29,10 @@ wowCreds = WowApiCredentialModel.WowApiCredentialModel(configSettings["clientId"
 
 #region Character Profile test calls
 # charProfController = WowCharacterProfileController.WowCharacterProfileController(wowCreds)
-# charEqReq = WowApiCharEquipSumRequest.WowApiCharEquipSumRequest(charName="charName", realmSlug="realmSlug")
+# charEqReq = AbstractWowApiProfileRequest.AbstractWowApiProfileRequest(characterName="characterName", realmSlug="realmSlug")
 # charEq = charProfController.GetCharacterEquipmentSummary(charEqReq)
 # print(charEq)
-# charMediaRequest = WowApiCharacterProfileRequest.WowApiCharacterProfileRequest(charName="charName", realmSlug="realmSlug")
+# charMediaRequest = WowApiCharacterProfileRequest.WowApiCharacterProfileRequest(characterName="characterName", realmSlug="realmSlug")
 # charMed = charProfController.GetCharacterProfileStatus(charMediaRequest)
 # print(charMed)
 #endregion
