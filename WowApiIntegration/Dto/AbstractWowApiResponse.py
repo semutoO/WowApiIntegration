@@ -1,9 +1,5 @@
-class AbstractWowApiResponse:
-    success = True,
-    errorMessage = None
-    response = None
-
-    def __init__(self, success, errorMessage, response):
+class AbstractWowApiResponse:    
+    def __init__(self, success = True, errorMessage = None, response = None):
         self.success = success
         self.errorMessage = errorMessage
         self.response = response
