@@ -1,11 +1,6 @@
-class AbstractWowApiRequest:
-    region = "us"
-    namespace = "dynamic-us"
-    locale = "en_US"
-    endpoint = None
-
-    def __init__(self, region, namespace, locale, endpoint):
-        self.region = region
-        self.namespace = namespace
-        self.locale = locale
+class AbstractWowApiRequest:    
+    def __init__(self, region = "us", namespace = "dynamic-us", locale="en_US", endpoint=None):
+        self.region = region if region is not None else "us"
+        self.namespace = namespace if namespace is not None else "dynamic-us"
+        self.locale = locale if locale is not None else "en_US"
         self.endpoint = endpoint
